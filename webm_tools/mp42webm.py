@@ -13,9 +13,10 @@ import os
 import argparse
 from subprocess import call
 
-def convert(infile, outfile, start=None, length=None):
+def convert(infile, outfile, start=None, length=None, qmax=45):
   '''Convert infile (usually .mp4)
   avconv -i infile.mp4 -ss 00:00:00 -t 00:00:10 -codec:v libvpx -an test.webm
+  ffmpeg -i video.mp4 -threads 3 -qmin 30 -quality best -c:v libvpx -b:v 3MB -an output.webm 
   '''
   #just run a system call to ffmpeg
   #ffmpeg -i input.flv -vcodec libvpx -acodec libvorbis output.webm
@@ -27,7 +28,7 @@ def convert(infile, outfile, start=None, length=None):
     command.extend(['-t', length])
 
   command.extend([
-    '-codec:v', 'libvpx', '-an',
+    '-codec:v', 'libvpx', '-qmax', str(qmax), '-fs', '3MB', '-an',
     '{outfile}'.format(outfile=outfile),
   ])
   
@@ -45,6 +46,7 @@ def main():
   parser.add_argument('-o', '--outfile', help='Output filename. mp4 extension will be added if absent)', type=str, default=None)
   parser.add_argument('-s', '--start', help='start time for .webem extraction as "00:00:00".', type=str, default=None)
   parser.add_argument('-l', '--length', help='Length for .webm extraction as "00:00:00"', type=str, default=None)
+  parser.add_argument('-q', '--qmax', help='Maximum encoding quantization (1-50). Smaller produces better, larger files.', type=int, default=45)
   args = parser.parse_args()
 
   infile = args.infile
@@ -57,6 +59,8 @@ def main():
     length= args.length
     #TODO: make sure length is in for "00:00:00"
 
+  qmax = args.qmax
+
   outfile = '{infile}.webm'.format(infile=infile)
   if args.outfile:
     #check to see if user specified output filename has .mp4 extention
@@ -64,7 +68,7 @@ def main():
     if get_ext(outfile).lower() != '.webm':
       outfile = '{outfile}.webm'.format(outfile=outfile)
 
-  convert(infile, outfile, start, length)
+  convert(infile, outfile, start, length, qmax)
         
 
 if __name__ == "__main__":
