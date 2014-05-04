@@ -27,6 +27,7 @@ setup(name='webm_tools',
     'console_scripts': [
       'mp42webm=webm_tools.mp42webm:main',
 			'nsv2mp4=webm_tools.nsv2mp4:main',
+      'gif2webm=webm_tools.gif2webm:main',
     ],
   },
   zip_safe=True)
